@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Taller: Daniel Steban Zambrano Molina</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--bg:#f4f7fb;--card:#fff;--accent:#0b63a8;--muted:#666;}
+  body{font-family:Inter,Segoe UI,Roboto,Arial; background:var(--bg); margin:24px; color:#111;}
+  header{max-width:1100px;margin:0 auto 18px}
+  h1{color:var(--accent); margin:6px 0}
+  p.lead{color:var(--muted); margin:0 0 18px}
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:18px}
+  .card{background:var(--card);padding:18px;border-radius:10px;box-shadow:0 6px 30px rgba(11,99,168,0.08)}
+  pre{background:#eef6ff;padding:12px;border-radius:8px;overflow:auto}
+  table.matrix{border-collapse:collapse;margin:auto}
+  table.matrix td, table.matrix th{border:1px solid #ddd;padding:6px 8px;text-align:center;font-family:monospace}
+  .one{background:#e6f6ff}
+  .oddRow{background:#fff5f5}
+  .oddCol{background:#fff5f5}
+  .highlight{background:#ffefc2}
+  .ok{color:green;font-weight:600}
+  .err{color:#cc0022;font-weight:700}
+  .step{background:#f7fbff;border-left:3px solid #cfe9ff;padding:8px;margin:8px 0;border-radius:6px}
+  .small{font-size:0.95rem;color:var(--muted)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  button{background:var(--accent);color:white;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+  button.secondary{background:#666}
+  .log{background:#f3f6f9;border-radius:8px;padding:10px;max-height:300px;overflow:auto;font-family:monospace}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .label{font-weight:600;color:#333;margin-bottom:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Taller: Daniel Steban Zambrano Molina</h1>
+</header>
+
+<div class="wrap">
+
+  <!-- PARIDAD BIDIMENSIONAL -->
+  <section class="card" id="paridadCard">
+    <h2>Parte 1 — Paridad Bidimensional (5×8)</h2>
+    <div class="small">Se organizan 40 bits en 5 filas × 8 columnas. Se calcula la paridad par de cada fila y columna y se muestra la localidad del error si existe una sola fila y una sola columna impar.</div>
+
+    <div style="margin-top:12px" class="controls">
+      <label style="display:flex;gap:6px;align-items:center">
+        Bloque:
+        <select id="parBloque">
+          <option value="1010110010100101011011101001010111110000">Bloque a</option>
+          <option value="1110111010110011010101010101010101111101">Bloque b</option>
+          <option value="0110101011010101010011011001010001100110">Bloque c</option>
+          <option value="1110101101110100110111010011011001110100">Bloque d</option>
+        </select>
+      </label>
+      <button onclick="runParidad()">Mostrar paso a paso</button>
+      <button class="secondary" onclick="resetParidad()">Limpiar</button>
+    </div>
+
+    <div id="paridadOutput"></div>
+  </section>
+
+  <!-- CRC -->
+  <section class="card" id="crcCard">
+    <h2>Parte 2 — CRC (División bit a bit)</h2>
+    <div class="small">Se muestra la división binaria paso a paso (XOR) y el resto final.</div>
+
+    <div class="grid" style="align-items:start">
+      <div>
+        <div class="label">Ejemplo 2.1 — Codificar</div>
+        <div class="small">Mensaje: <b>1101011011</b> — Generador: <b>10011</b> (x⁴ + x + 1)</div>
+        <div style="margin-top:8px"><button onclick="runCrcEncode()">Mostrar división paso a paso (codificación)</button></div>
+        <div id="crcEncodeLog" class="log" style="margin-top:8px"></div>
+      </div>
+
+      <div>
+        <div class="label">Ejemplo 2.2 — Verificación</div>
+        <div class="small">Mensaje recibido: <b>10110011100111</b> — Generador: <b>10001</b> (x⁴ + 1)</div>
+        <div style="margin-top:8px"><button onclick="runCrcCheck()">Mostrar división paso a paso (verificación)</button></div>
+        <div id="crcCheckLog" class="log" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HAMMING -->
+  <section class="card" id="hammingCard">
+    <h2>Parte 3 — Hamming (7,4) y (15,11) — Cálculo y corrección</h2>
+    <div class="small">Se muestran cómo se calculan los bits de paridad, cómo se forma el código y cómo se calcula el síndrome paso a paso.</div>
+
+    <div class="grid">
+      <div>
+        <div class="label">Hamming (7,4) — Codificar 1011</div>
+        <button onclick="runHammingEncode74()">Mostrar pasos (codificación)</button>
+        <div id="hamEncodeLog" class="log" style="margin-top:8px"></div>
+      </div>
+
+      <div>
+        <div class="label">Hamming (7,4) — Verificar 1010011</div>
+        <button onclick="runHammingDecode74()">Mostrar pasos (detección/corrección)</button>
+        <div id="hamDecodeLog" class="log" style="margin-top:8px"></div>
+      </div>
+
+      <div style="grid-column:1 / -1">
+        <div class="label">Hamming (15,11) — Codificar 10110010101</div>
+        <button onclick="runHammingEncode1511()">Mostrar pasos (codificación)</button>
+        <div id="ham1511Log" class="log" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+
+<script>
+/* ===================
+   UTIL: construir tabla para matriz
+   =================== */
+function buildMatrixHTML(bits, rows, cols, highlightPos) {
+  let html = '<table class="matrix"><tbody>';
+  let idx = 0;
+  for (let r = 0; r < rows; r++) {
+    html += '<tr>';
+    for (let c = 0; c < cols; c++) {
+      let val = bits[idx++];
+      let classes = val === 1 ? 'one' : '';
+      if (highlightPos && highlightPos.r===r && highlightPos.c===c) classes += ' highlight';
+      html += `<td class="${classes}">${val}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+/* ===================
+   PARIDAD BIDIMENSIONAL (mostrar pasos)
+   =================== */
+function runParidad(){
+  const sel = document.getElementById('parBloque');
+  const bitsStr = sel.value.trim();
+  const rows = 5, cols = 8;
+  const bits = bitsStr.split('').map(b=>parseInt(b,10));
+  const out = document.getElementById('paridadOutput');
+  out.innerHTML = '';
+
+  // construir matriz
+  let mat = [];
+  let idx = 0;
+  for (let r=0;r<rows;r++){
+    mat[r]=[];
+    for (let c=0;c<cols;c++){
+      mat[r][c]=bits[idx++];
+    }
+  }
+
+  // mostrar matriz
+  out.innerHTML += '<div class="step"><div class="label">Matriz (filas x columnas)</div>' + buildMatrixHTML(bits, rows, cols) + '</div>';
+
+  // calcular sumas por fila y marcar cuales son impares
+  let filaSums = [];
+  let filaOdd = [];
+  for (let r=0;r<rows;r++){
+    let s = mat[r].reduce((a,b)=>a+b,0);
+    filaSums.push(s);
+    if (s%2!==0) filaOdd.push(r);
+  }
+
+  // calcular sumas por columna
+  let colSums = [];
+  let colOdd = [];
+  for (let c=0;c<cols;c++){
+    let s=0;
+    for (let r=0;r<rows;r++) s+=mat[r][c];
+    colSums.push(s);
+    if (s%2!==0) colOdd.push(c);
+  }
+
+  // mostrar sumas
+  let html = '<div class="step"><div class="label">Cálculo de paridad por fila</div>';
+  html += '<div class="small">Mostramos la suma de 1s por fila y si es par/ímpar</div><pre>';
+  filaSums.forEach((s,i)=> html += `Fila ${i}: suma=${s} → ${(s%2===0)?'par':'IMPAR'}\n`);
+  html += '</pre></div>';
+
+  html += '<div class="step"><div class="label">Cálculo de paridad por columna</div>';
+  html += '<div class="small">Mostramos la suma de 1s por columna y si es par/ímpar</div><pre>';
+  colSums.forEach((s,i)=> html += `Col ${i}: suma=${s} → ${(s%2===0)?'par':'IMPAR'}\n`);
+  html += '</pre></div>';
+
+  out.innerHTML += html;
+
+  // decisión
+  if (filaOdd.length===0 && colOdd.length===0){
+    out.innerHTML += `<div class="step"><span class="ok">No se detectan errores: todas las filas y columnas tienen paridad par.</span></div>`;
+    return;
+  }
+
+  out.innerHTML += `<div class="step"><div class="label">Filas impares: ${filaOdd.length?filaOdd.join(', '):'Ninguna'} — Columnas impares: ${colOdd.length?colOdd.join(', '):'Ninguna'}</div></div>`;
+
+  if (filaOdd.length===1 && colOdd.length===1){
+    const r = filaOdd[0], c = colOdd[0];
+    out.innerHTML += `<div class="step"><span class="err">Se localiza 1 bit errado en la intersección: fila ${r}, columna ${c}.</span>`;
+    out.innerHTML += '<div class="small">Antes de corregir (parte de la matriz con posición resaltada):</div>';
+    out.innerHTML += buildMatrixHTML(bits, rows, cols, {r:c? r:r, c:c});
+    // construir corregido
+    const corrected = bits.slice();
+    const pos = r*cols + c;
+    corrected[pos] = 1 - corrected[pos];
+    out.innerHTML += '<div class="small" style="margin-top:8px">Bits antes → después (se invierte el bit):</div>';
+    out.innerHTML += `<pre>${bits.join('')}  →  ${corrected.join('')}</pre>`;
+    out.innerHTML += '<div class="small">Matriz corregida:</div>';
+    out.innerHTML += buildMatrixHTML(corrected, rows, cols);
+    out.innerHTML += '</div>';
+    return;
+  }
+
+  out.innerHTML += `<div class="step"><span class="err">Patrón no corregible automáticamente con esta técnica (más de una fila o columna impar).</span></div>`;
+}
+
+// reset visual
+function resetParidad(){ document.getElementById('paridadOutput').innerHTML = ''; }
+
+/* ===================
+   CRC — división paso a paso (registro de logs)
+   =================== */
+function xorBitString(a,b){
+  // a and b same length
+  let r='';
+  for (let i=0;i<a.length;i++) r += (a[i]===b[i])?'0':'1';
+  return r;
+}
+
+function longDivisionSteps(dividend, divisor){
+  // returns log array and remainder
+  let n = dividend.length;
+  let pick = divisor.length;
+  let cur = dividend.substr(0, pick);
+  let logs = [];
+  let idx = pick;
+  while (true) {
+    if (cur[0] === '1') {
+      let x = xorBitString(cur, divisor);
+      logs.push({pos: idx - pick, cur, op: 'XOR divisor', result: x});
+      // append next bit if exists
+      if (idx < n) {
+        cur = x.substr(1) + dividend[idx];
+        idx++;
+      } else {
+        // last
+        cur = x;
+        break;
+      }
+    } else {
+      let zeros = '0'.repeat(pick);
+      let x = xorBitString(cur, zeros);
+      logs.push({pos: idx - pick, cur, op: 'XOR zeros', result: x});
+      if (idx < n) {
+        cur = x.substr(1) + dividend[idx];
+        idx++;
+      } else {
+        cur = x;
+        break;
+      }
+    }
+  }
+  // última operación to reduce length to pick
+  if (cur[0]==='1'){
+    let x = xorBitString(cur, divisor);
+    logs.push({pos: idx - pick, cur, op:'XOR divisor (final)', result: x});
+    cur = x;
+  } else {
+    let zeros = '0'.repeat(cur.length);
+    let x = xorBitString(cur, zeros);
+    logs.push({pos: idx - pick, cur, op:'XOR zeros (final)', result: x});
+    cur = x;
+  }
+  // remainder is last (cur without first bit) but we normalize to divisor.length-1
+  let remLen = divisor.length - 1;
+  let remainder = cur.substr(1);
+  if (remainder.length < remLen) remainder = '0'.repeat(remLen - remainder.length) + remainder;
+  if (remainder.length > remLen) remainder = remainder.slice(-remLen);
+  return {logs, remainder};
+}
+
+function runCrcEncode(){
+  const message = '1101011011';
+  const generator = '10011';
+  const k = generator.length - 1;
+  const augmented = message + '0'.repeat(k);
+  const out = document.getElementById('crcEncodeLog');
+  out.innerHTML = '';
+  out.innerHTML += `Mensaje original: ${message}\nGenerador: ${generator}\nMensaje aumentado: ${augmented}\n\n`;
+  const result = longDivisionSteps(augmented, generator);
+  result.logs.forEach((l,i)=>{
+    out.innerHTML += `Paso ${i+1} | index=${l.pos} | cur=${l.cur} | ${l.op} => result=${l.result}\n`;
+  });
+  out.innerHTML += `\nResto final (grado ${k}): ${result.remainder}\n`;
+  out.innerHTML += `Mensaje a transmitir = mensaje + resto = ${message}${result.remainder}\n`;
+}
+
+function runCrcCheck(){
+  const received = '10110011100111';
+  const generator = '10001';
+  const out = document.getElementById('crcCheckLog');
+  out.innerHTML = '';
+  out.innerHTML += `Mensaje recibido: ${received}\nGenerador: ${generator}\n\n`;
+  const result = longDivisionSteps(received, generator);
+  result.logs.forEach((l,i)=>{
+    out.innerHTML += `Paso ${i+1} | index=${l.pos} | cur=${l.cur} | ${l.op} => result=${l.result}\n`;
+  });
+  out.innerHTML += `\nResto final: ${result.remainder}\n`;
+  const ok = /^0+$/.test(result.remainder);
+  out.innerHTML += ok ? '\nResultado: MENSAJE VÁLIDO (resto = 0)\n' : '\nResultado: MENSAJE CON ERROR (resto ≠ 0)\n';
+}
+
+/* ===================
+   HAMMING — funciones paso a paso
+   =================== */
+function positionsPowers(n){
+  const arr=[];
+  let p=1;
+  while(p<=n){arr.push(p);p*=2;}
+  return arr;
+}
+
+function runHammingEncode74(){
+  const data = '1011';
+  const out = document.getElementById('hamEncodeLog');
+  out.innerHTML = '';
+  out.innerHTML += `Datos a codificar (m=4): ${data}\n`;
+  const bits = data.split('').map(x=>parseInt(x));
+  // calcular r
+  let r=0;
+  while (Math.pow(2,r) < (bits.length + r + 1)) r++;
+  out.innerHTML += `Se buscan r tal que 2^r >= m+r+1 → r = ${r}\n`;
+  const n = bits.length + r;
+  out.innerHTML += `Longitud final n = m + r = ${n}\n`;
+  const parities = positionsPowers(n);
+  out.innerHTML += `Posiciones de paridad (potencias de 2): ${parities.join(', ')}\n\n`;
+  // construir array con placeholders
+  let code = Array(n).fill(null);
+  let j=0;
+  for (let i=1;i<=n;i++){
+    if (parities.includes(i)) code[i-1] = 0; else code[i-1] = bits[j++];
+  }
+  out.innerHTML += `Posiciones iniciales (P = paridad, D = dato):\nIndex: `;
+  for (let i=1;i<=n;i++) out.innerHTML += `${i}`.padStart(3,' ');
+  out.innerHTML += '\nValue: ';
+  code.forEach(v=> out.innerHTML += `${v}`.padStart(3,' '));
+  out.innerHTML += '\n\nCálculo de cada bit de paridad:\n';
+  parities.forEach(p=>{
+    // suma de todos los bits con i & p != 0
+    let sum=0;
+    let covered=[];
+    for (let i=1;i<=n;i++){
+      if ((i & p) !==0){
+        covered.push(i);
+        if (i!==p) sum += code[i-1];
+      }
+    }
+    const parity = sum%2;
+    code[p-1] = parity;
+    out.innerHTML += `P${p}: cubre posiciones ${covered.join(', ')} → suma(datos)=${sum} → P${p}=${parity}\n`;
+  });
+  out.innerHTML += `\nCódigo Hamming(7,4) resultante: ${code.join('')}\n`;
+}
+
+function runHammingDecode74(){
+  const received = '1010011';
+  const out = document.getElementById('hamDecodeLog');
+  out.innerHTML = '';
+  out.innerHTML += `Mensaje recibido (n=7): ${received}\n`;
+  const bits = received.split('').map(x=>parseInt(x));
+  const n = bits.length;
+  const parities = positionsPowers(n);
+  out.innerHTML += `Posiciones de paridad esperadas: ${parities.join(', ')}\n\n`;
+  // calcular síndrome
+  let syndrome = 0;
+  parities.forEach(p=>{
+    let sum=0;
+    let covered=[];
+    for (let i=1;i<=n;i++){
+      if ((i & p) !== 0){
+        covered.push(i);
+        sum += bits[i-1];
+      }
+    }
+    out.innerHTML += `Chequeo P${p}: posiciones ${covered.join(', ')} → suma=${sum} → residuo=${sum%2}\n`;
+    if (sum%2 !== 0) syndrome += p;
+  });
+  out.innerHTML += `\nSíndrome (valor decimal) = ${syndrome}\n`;
+  if (syndrome === 0){
+    out.innerHTML += '\nNo hay errores detectados (síndrome = 0).\n';
+  } else if (syndrome >=1 && syndrome <= n){
+    out.innerHTML += `\nError detectado en la posición ${syndrome}. Se corrige invirtiendo ese bit.\n`;
+    // corregir
+    bits[syndrome-1] = 1 - bits[syndrome-1];
+    out.innerHTML += `Secuencia corregida: ${bits.join('')}\n`;
+    // extraer datos (pos no paridad)
+    let data = [];
+    for (let i=1;i<=n;i++) if (!parities.includes(i)) data.push(bits[i-1]);
+    out.innerHTML += `Datos decodificados (pos no paridad): ${data.join('')}\n`;
+  } else {
+    out.innerHTML += '\nSíndrome fuera de rango → no se puede corregir con este código.\n';
+  }
+}
+
+function runHammingEncode1511(){
+  const data = '10110010101'; // 11 bits
+  const out = document.getElementById('ham1511Log');
+  out.innerHTML = '';
+  out.innerHTML += `Datos a codificar (m=11): ${data}\n`;
+  const bits = data.split('').map(x=>parseInt(x));
+  // calcular r
+  let r=0;
+  while (Math.pow(2,r) < (bits.length + r + 1)) r++;
+  out.innerHTML += `Se calcula r tal que 2^r >= m+r+1 → r = ${r}\n`;
+  const n = bits.length + r;
+  out.innerHTML += `n = m + r = ${n}\n`;
+  const parities = positionsPowers(n);
+  out.innerHTML += `Posiciones de paridad: ${parities.join(', ')}\n\n`;
+  // construir array
+  let code = Array(n).fill(null);
+  let j=0;
+  for (let i=1;i<=n;i++){
+    if (parities.includes(i)) code[i-1]=0; else code[i-1]=bits[j++];
+  }
+  out.innerHTML += `Posiciones iniciales (Index / Value):\nIndex: `;
+  for (let i=1;i<=n;i++) out.innerHTML += `${i}`.padStart(3,' ');
+  out.innerHTML += '\nValue: ';
+  code.forEach(v=> out.innerHTML += `${v}`.padStart(3,' '));
+  out.innerHTML += '\n\nCálculo de paridades:\n';
+  parities.forEach(p=>{
+    let sum=0; let covered=[];
+    for (let i=1;i<=n;i++){
+      if ((i & p) !==0){
+        covered.push(i);
+        if (i!==p) sum += code[i-1];
+      }
+    }
+    let parity = sum%2;
+    code[p-1] = parity;
+    out.innerHTML += `P${p} cubre ${covered.join(', ')} → suma(datos)=${sum} → P${p}=${parity}\n`;
+  });
+  out.innerHTML += `\nCódigo Hamming(15,11) resultante:\n${code.join('')}\n`;
+}
+
+</script>
+</body>
+</html>
